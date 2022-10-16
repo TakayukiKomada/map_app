@@ -10,16 +10,19 @@
         @method('patch')
         <div>
             <label for="name">店舗名:</label>
-            <input type="text" name="name" id="name" value="{{ old("name", $shop->name) }}">
+            <input type="text" name="name" id="name" value="{{ old('name', $shop->name) }}">
         </div>
         <div>
             <label for="description">詳細:</label>
-            <textarea name="description" id="description" cols="30" rows="10">{{ old("description", $shop->description) }}</textarea>
+            <textarea name="description" id="description" cols="30"
+                rows="10">{{ old('description', $shop->description) }}</textarea>
         </div>
         <div>
             <label for="address">住所:</label>
-            <input type="text" name="address" id="address" value="{{ old("address", $shop->address) }}">
+            <input type="text" name="address" id="address" value="{{ old('address', $shop->address) }}">
         </div>
+        <input type="hidden" id="latitude" name="latitude" value="{{ $shop->latitude }}">
+        <input type="hidden" id="longitude" name="longitude" value="{{ $shop->longitude }}">
         <div id="map" style="height:50vh;"></div>
         <div>
             <input type="submit" value="修正">
@@ -32,10 +35,17 @@
 @section('script')
     @include('partial.map')
     <script>
-        @if(!empty($shop))
-            var marker = L.marker([{{ $shop->latitude}}, {{ $shop->longitude}}])
+        const lat = document.getElementById('latitude');
+        const lng = document.getElementById('longitude');
+        @if (!empty($shop))
+            const marker = L.marker([{{ $shop->latitude }}, {{ $shop->longitude }}], {draggable: true})
                 .bindPopup("{{ $shop->name }}", {closeButton: false})
                 .addTo(map);
+            marker.on('dragend', function(e) {
+                // 座標は、e.target.getLatLng()で取得
+                lat.value = e.target.getLatLng()['lat'];
+                lng.value = e.target.getLatLng()['lng'];
+            });
         @endif
     </script>
 @endsection
